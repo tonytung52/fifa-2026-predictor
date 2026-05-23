@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>2026 FIFA World Cup - 48隊世界盃模擬預測大師</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Confetti Canvas for celebration -->
+  <canvas id="confetti-canvas" style="position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:999;"></canvas>
+
+  <header>
+    <div class="brand">
+      <span class="logo-icon">🏆</span>
+      <div>
+        <h1>2026 FIFA World Cup</h1>
+        <p style="font-size: 0.75rem; color: var(--accent-cyan); font-weight: 700; letter-spacing: 1px; text-transform: uppercase;">48-Team Simulator</p>
+      </div>
+    </div>
+    <nav class="nav-tabs">
+      <button class="tab-btn active" data-tab="dashboard-view">📊 控制台與設定</button>
+      <button class="tab-btn" data-tab="group-view">⚽ 小組積分賽</button>
+      <button class="tab-btn" data-tab="bracket-view">⚔️ 淘汰賽對決</button>
+      <button class="tab-btn" data-tab="champion-view">👑 冠軍與統計</button>
+    </nav>
+  </header>
+
+  <main>
+    <!-- View 1: Dashboard & Settings -->
+    <section id="dashboard-view" class="tab-content active">
+      <div class="grid-2">
+        <div class="glass-panel">
+          <h2 class="section-title">模擬參數設定</h2>
+          <div class="settings-group">
+            <div class="setting-row">
+              <div class="setting-label">
+                <span>爆冷機率 (Upset Probability)</span>
+                <span class="val" id="upset-val">25%</span>
+              </div>
+              <input type="range" id="param-upset" min="0" max="100" value="25">
+            </div>
+
+            <div class="setting-row">
+              <div class="setting-label">
+                <span>高比分偏好 (High Scoring Bias)</span>
+                <span class="val" id="scoring-val">標準 (1.5x)</span>
+              </div>
+              <input type="range" id="param-scoring" min="5" max="30" value="15">
+            </div>
+
+            <div class="setting-row">
+              <label class="setting-label" style="cursor: pointer;">
+                <span>美加墨地主優勢 (Host Advantage)</span>
+                <input type="checkbox" id="param-host" checked style="width:18px; height:18px; accent-color:var(--accent-cyan);">
+              </label>
+            </div>
+
+            <div class="setting-row">
+              <span class="setting-label">模擬風格 (Simulation Theme)</span>
+              <div class="radio-group" id="sim-theme-group">
+                <div class="radio-btn active" data-theme="realistic">防守防反</div>
+                <div class="radio-btn" data-theme="chaotic">瘋狂大亂鬥</div>
+                <div class="radio-btn" data-theme="attack">火力全開</div>
+              </div>
+            </div>
+
+            <div style="margin-top: 1rem; display: flex; gap: 1rem;">
+              <button class="action-btn" id="btn-quick-full">⚡ 一鍵完成模擬</button>
+              <button class="action-btn secondary" id="btn-reset">🔄 重置預測</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="glass-panel">
+          <h2 class="section-title">2026 賽制簡介</h2>
+          <p style="color: var(--text-secondary); margin-bottom: 1.25rem; font-size: 0.95rem; line-height: 1.6;">
+            本屆世界盃由美國、加拿大與墨西哥聯合舉辦。參賽隊伍擴增至 <strong>48 支球隊</strong>，分為 <strong>12 個小組 (A-L組)</strong>，每組 4 隊。
+            <br><br>
+            小組賽結束後，<strong>各組前兩名</strong>與 <strong>8 個表現最好的小組第三名</strong>將晉級 32 強淘汰賽，隨後展開激烈的單敗淘汰制爭奪大力神盃！
+          </p>
+          <div class="quick-stats">
+            <div class="stat-card">
+              <div class="stat-num">48</div>
+              <div class="stat-desc">參賽球隊數</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-num">104</div>
+              <div class="stat-desc">總賽事場次</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Match Live Ticker Commentary (Always useful) -->
+      <div class="glass-panel" style="margin-top: 1.5rem;">
+        <h2 class="section-title">精彩比賽賽況即時播報 (Live Ticker)</h2>
+        <div class="ticker-panel" id="live-ticker">
+          <div class="ticker-title">🕒 賽事播報準備中...</div>
+          <div class="ticker-event">
+            <div class="ticker-time">00'</div>
+            <div class="ticker-txt">設定完參數後，請點擊上方<strong>小組積分賽</strong>或<strong>一鍵完成模擬</strong>開始預測！</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- View 2: Group Stage -->
+    <section id="group-view" class="tab-content">
+      <div class="glass-panel" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem;">
+        <div>
+          <h2 class="section-title" style="margin-bottom:0.25rem;">12 個小組賽程表</h2>
+          <p style="color: var(--text-secondary); font-size: 0.9rem;">您可以點擊各組的「自動模擬小組」或是一鍵模擬全部。</p>
+        </div>
+        <div style="display: flex; gap: 0.75rem;">
+          <button class="action-btn" id="btn-sim-all-groups" style="width: auto; padding: 0.6rem 1.2rem; font-size: 0.9rem;">⚡ 模擬所有小組</button>
+        </div>
+      </div>
+
+      <div class="group-grid" id="groups-container">
+        <!-- Javascript will render 12 group cards here -->
+      </div>
+
+      <!-- Best 3rd place standings -->
+      <div class="glass-panel thirds-panel">
+        <h2 class="section-title">小組第三名排行榜 (最佳前 8 名晉級)</h2>
+        <p style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 1rem;">
+          規則排序：積分 > 淨勝球 > 進球數 > 公平競賽積分。點擊任何球隊可修改球隊能力值。
+        </p>
+        <div class="thirds-list" id="thirds-container">
+          <!-- JS will render 3rd place list here -->
+        </div>
+      </div>
+    </section>
+
+    <!-- View 3: Knockout Bracket -->
+    <section id="bracket-view" class="tab-content">
+      <div class="glass-panel" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem;">
+        <div>
+          <h2 class="section-title" style="margin-bottom:0.25rem;">32 強淘汰賽對決</h2>
+          <p style="color: var(--text-secondary); font-size: 0.9rem;">
+            點擊對決卡片中的「模擬」或點選特定球隊讓其手動晉級。小組賽未模擬前，此處為待定狀態。
+          </p>
+        </div>
+        <div style="display: flex; gap: 0.75rem;">
+          <button class="action-btn" id="btn-sim-all-knockouts" style="width: auto; padding: 0.6rem 1.2rem; font-size: 0.9rem;">⚡ 自動模擬所有淘汰賽</button>
+        </div>
+      </div>
+
+      <div class="bracket-wrapper">
+        <div class="bracket-container" id="bracket-canvas-container">
+          <!-- JS will dynamically draw the brackets -->
+          
+          <!-- Round of 32 -->
+          <div class="bracket-round" id="round-r32">
+            <div class="round-header">32強淘汰賽</div>
+            <div class="round-matches-list" style="display: flex; flex-direction: column; gap: 1.5rem; justify-content: space-around; height: 100%;"></div>
+          </div>
+
+          <!-- Round of 16 -->
+          <div class="bracket-round" id="round-r16">
+            <div class="round-header">16強淘汰賽</div>
+            <div class="round-matches-list" style="display: flex; flex-direction: column; gap: 3rem; justify-content: space-around; height: 100%;"></div>
+          </div>
+
+          <!-- Quarter Finals -->
+          <div class="bracket-round" id="round-qf">
+            <div class="round-header">半準決賽 (8強)</div>
+            <div class="round-matches-list" style="display: flex; flex-direction: column; gap: 6rem; justify-content: space-around; height: 100%;"></div>
+          </div>
+
+          <!-- Semi Finals -->
+          <div class="bracket-round" id="round-sf">
+            <div class="round-header">準決賽 (4強)</div>
+            <div class="round-matches-list" style="display: flex; flex-direction: column; gap: 12rem; justify-content: space-around; height: 100%;"></div>
+          </div>
+
+          <!-- Finals & 3rd Playoff -->
+          <div class="bracket-round" id="round-final">
+            <div class="round-header">決賽 & 季軍賽</div>
+            <div class="round-matches-list" style="display: flex; flex-direction: column; gap: 6rem; justify-content: center; height: 100%;">
+              <div id="final-match-box"></div>
+              <div id="third-place-match-box" style="margin-top: 2rem;"></div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- View 4: Champion & Stats -->
+    <section id="champion-view" class="tab-content">
+      <div class="glass-panel celebration-view" id="celebration-panel" style="display:none;">
+        <div class="trophy-container">
+          <div class="trophy-glow"></div>
+          <div class="trophy-img">🏆</div>
+        </div>
+        <h2 class="champ-title" id="champ-team-name">阿根廷</h2>
+        <div class="champ-subtitle">勇奪 2026 世界盃總冠軍！</div>
+        
+        <div class="results-summary-grid">
+          <div class="summary-card">
+            <h3>🥈 亞軍球隊</h3>
+            <div id="runner-up-box" style="font-size: 1.25rem; font-weight: 700; display: flex; align-items: center; gap: 0.5rem;">
+              --
+            </div>
+          </div>
+          <div class="summary-card">
+            <h3>🥉 季軍球隊</h3>
+            <div id="third-place-box" style="font-size: 1.25rem; font-weight: 700; display: flex; align-items: center; gap: 0.5rem;">
+              --
+            </div>
+          </div>
+          <div class="summary-card">
+            <h3>🎖️ 預測金靴獎 (最火熱射手)</h3>
+            <div id="golden-boot-box" style="font-size: 1.15rem; font-weight: 600; display: flex; flex-direction: column; gap: 0.25rem;">
+              --
+            </div>
+          </div>
+        </div>
+
+        <button class="action-btn" id="btn-share" style="width: auto; margin-top: 2rem; padding: 0.75rem 2rem;">📤 複製預測報告摘要</button>
+      </div>
+
+      <div class="glass-panel" id="no-champion-panel" style="text-align: center; padding: 4rem 1rem;">
+        <div style="font-size: 4rem; margin-bottom: 1rem;">🏟️</div>
+        <h2>賽事尚未決出冠軍</h2>
+        <p style="color: var(--text-secondary); margin-top: 0.5rem;">
+          請前往<strong>控制台</strong>或<strong>淘汰賽對決</strong>，完成所有淘汰賽模擬後再來查看頒獎典禮！
+        </p>
+      </div>
+    </section>
+  </main>
+
+  <!-- Team Details Modal Popup -->
+  <div class="modal-overlay" id="team-modal">
+    <div class="modal-content">
+      <button class="modal-close" id="modal-close-btn">&times;</button>
+      <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem;">
+        <span id="modal-team-flag" style="font-size: 3rem;">🇺🇸</span>
+        <div>
+          <h3 id="modal-team-name" style="font-size: 1.6rem; font-weight: 800;">美國</h3>
+          <p id="modal-team-meta" style="color: var(--text-secondary); font-size: 0.9rem;">CONCACAF | A組</p>
+        </div>
+      </div>
+
+      <div class="glass-panel" style="background: rgba(0,0,0,0.2); border-color: rgba(255,255,255,0.05); padding: 1rem; margin-bottom: 1.5rem;">
+        <div style="display:flex; justify-content:space-between; font-size:0.9rem; margin-bottom: 0.5rem;">
+          <span>🌟 核心明星球員:</span>
+          <strong id="modal-team-star" style="color: var(--accent-cyan);">Christian Pulisic</strong>
+        </div>
+      </div>
+
+      <h4 style="font-size: 1rem; margin-bottom: 0.5rem;">調整戰力指數 (1-99)</h4>
+      <div class="stat-bar-container">
+        <div class="stat-bar-row">
+          <div class="stat-bar-lbl">
+            <span>⚔️ 進攻火力 (Attack)</span>
+            <span id="lbl-modal-att">85</span>
+          </div>
+          <input type="range" id="input-modal-att" min="50" max="99" value="85">
+        </div>
+
+        <div class="stat-bar-row">
+          <div class="stat-bar-lbl">
+            <span>🛡️ 防守鐵壁 (Defense)</span>
+            <span id="lbl-modal-def">82</span>
+          </div>
+          <input type="range" id="input-modal-def" min="50" max="99" value="82">
+        </div>
+
+        <div class="stat-bar-row">
+          <div class="stat-bar-lbl">
+            <span>⚙️ 中場調度 (Midfield)</span>
+            <span id="lbl-modal-mid">83</span>
+          </div>
+          <input type="range" id="input-modal-mid" min="50" max="99" value="83">
+        </div>
+      </div>
+
+      <button class="action-btn" id="btn-save-team-stats" style="margin-top: 1.5rem;">💾 保存戰力設定</button>
+    </div>
+  </div>
+
+  <!-- Include data & application logic -->
+  <script src="teams.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
